@@ -1,11 +1,11 @@
 """
 通过平均化像素值实现图片像素化
 """
-
 from PIL import Image
 import os
 import random
 import numpy as np
+import cv2
 
 
 # r, g, b 通道像素区间
@@ -104,6 +104,8 @@ def pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type
 
     # 使用 numpy 获取图像数据
     img_data = np.array(image)
+    
+    # 默认只支持处理 RGB 图像，对于 RGBA，舍弃最后一层的透明度通道
     if img_data.shape[-1] == 4:
         img_data = img_data[:, :, :3]
     
@@ -145,14 +147,47 @@ def pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type
     pixelated_image = Image.fromarray(pixelated_data)
     pixelated_image.save(out_image_path)
     print('success')
+    return pixelated_data, pixelated_image
+
+
+def apply_canny_edge_detection(image, lower_threshold=10, upper_threshold=100):
+    """
+    使用 Canny 算法检测图像的边缘
+    """
+    edges = cv2.Canny(image, lower_threshold, upper_threshold)
+    return edges
+
+
+def enhance_edges(pixelated_image, canny_edges, edge_weight=0.5):
+    """
+    将 Canny 边缘检测结果与原始像素化图像进行融合,增强边缘效果
+    """
+    # 将 Canny 边缘检测结果转换为 RGB 格式
+    canny_rgb = cv2.cvtColor(canny_edges, cv2.COLOR_GRAY2RGB)
+    
+    # 将Canny边缘检测结果与原始像素化图像进行加权融合
+    enhanced_image = cv2.addWeighted(pixelated_image, 1 - edge_weight, canny_rgb, edge_weight, 0)
+    
+    return enhanced_image
 
 
 if __name__ == '__main__':
     # 像素块的大小（正方形边长）
-    pixel_size = 3             # 5, 7, 10, 13, 16, 20
+    pixel_size = 6             # 5, 7, 10, 13, 16, 20
     image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'simple_images', 'wukong.jpg')
     # image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'standard_images', 'jz9.jpg')
     # image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'phone_background', 'rw7.jpg')
     out_image_path = os.path.join(os.path.dirname(image_path), os.path.basename(image_path).replace('.', f'_pix_{pixel_size}_out.'))
     # median 和 range+color_gaps[=5] 的效果较好，但这种方式的色彩不如 tiler 项目的色彩鲜艳
-    pixelated_image = pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type='range')
+    pixelated_data, pixelated_image = pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type='range')
+
+    # # 应用 Canny 边缘检测算法
+    # canny_edges = apply_canny_edge_detection(pixelated_data)
+
+    # # 增强边缘效果
+    # enhanced_image = enhance_edges(pixelated_data, canny_edges, edge_weight=0.1)
+
+    # enhanced_image = Image.fromarray(enhanced_image)
+    # enhanced_image.save(out_image_path.replace('.', '_edgeenhance.'))
+
+

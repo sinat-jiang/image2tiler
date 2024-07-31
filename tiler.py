@@ -183,7 +183,7 @@ def create_tiled_image(boxes, res, args, render=False):
     return img
 
 
-def tiler_pixlate(image_path, tiles_paths, out_image_path, args):
+def tiler_pixlate(image_path, tiles_paths, out_image_path, args, tiles=None):
     """
     使用基础 tiler 进行像素化
     """
@@ -208,7 +208,10 @@ def tiler_pixlate(image_path, tiles_paths, out_image_path, args):
             print('Tiles folder not found')
             exit(-1)
 
-    tiles = load_tiles(tiles_paths, args)
+    # 没传入 tiles，需要即时加载
+    if tiles is None:
+        tiles = load_tiles(tiles_paths, args)
+    
     boxes, original_res = get_processed_image_boxes(image_path, tiles, args)
     img = create_tiled_image(boxes, original_res, args, render=args['RENDER'])
     cv2.imwrite(out_image_path, img)
