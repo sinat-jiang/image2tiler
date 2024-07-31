@@ -1,0 +1,7 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+.idea/
+.git/
+test_images/
+test_videos/
+tmp/
