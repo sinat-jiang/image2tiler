@@ -108,58 +108,57 @@ def frames_to_pixelate(frames_path, new_frames_save_path, kwargs, type='simple',
             # 提前加载好 tiler
             tiles = load_tiles(kwargs['tiles_paths'], kwargs)
             
-        for frame in tqdm(frames, desc='Image2ascii:'):
+        for frame in tqdm(frames, desc='Image2pixelate:'):
             frame = os.path.join(frames_path, frame)
             # 依次进行转换并存储
             output_image = os.path.join(new_frames_save_path, os.path.basename(frame))
             if type == 'simple':
                 task = pool.submit(pixelate_image_parallel, frame, output_image, **kwargs)
             elif type == 'tiler':
-                
                 task = pool.submit(tiler_pixlate, frame, kwargs['tiles_paths'], output_image, kwargs, tiles)
             else:
                 print('请指定正确的转换类型')
     
-    print('All frames are converted to ascii style.')
+    print('All frames are converted to pixelate style.')
 
 
 if __name__ == '__main__':
     
     # 1 拆帧
-    video_path = f'./test_videos/fire.mp4'         # 视频文件路径
+    video_path = f'./test_videos/dance5.mp4'         # 视频文件路径
     output_folder = os.path.join(os.path.dirname(video_path), f"{os.path.basename(video_path).split('.')[0]}_frames")   # 输出文件夹路径
     # fps = video_frames_extract(video_path, output_folder, ff=None)
 
     # 2 像素风格转化
-    type = 'tiler'     # or tiler
+    type = 'simple'     # simple or tiler
     new_frames_save_path = os.path.join(os.path.dirname(output_folder), f"{os.path.basename(video_path).split('.')[0]}_{type}_pixelate_frames")
     # params for simple pixelate
-    # kwargs = {
-    #     'pixel_size': 10,           # 像素块大小
-    #     'pix_cal_type': 'median'    # 像素块值计算模式
-    # }
-    # params for tiler pixelate
     kwargs = {
-        # number of divisions per channel, (COLOR_DEPTH = 32 -> 32 * 32 * 32 = 32768 colors)
-            'COLOR_DEPTH': 255,    
-        # Scale of the image to be tiled (1 = default resolution)      
-            'IMAGE_SCALE': 1,               # 只会改变图像尺寸 w 和 h，但不会改变 tile 相对于图片的大小
-        # tiles scales (1 = default resolution), e.g. RESIZING_SCALES = [0.5, 0.4, 0.3, 0.2, 0.1]。根据原始 tiler 的大小进行放缩，原始 tiler 为 100x100 时，设为 0.1 表示 10x10
-            'RESIZING_SCALES': [0.1],       # 当只有一个元素时，表示只保留一种大小的像素，并且可以依此调整像素块的大小【一般设 0.2 效果还行，如果图片本身尺寸较小，可以设为 0.02-0.05 看看效果】
-        # number of pixels shifted to create each box (tuple with (x,y))
-        # if value is None, shift will be done accordingly to tiles dimensions
-            'PIXEL_SHIFT': None,
-        # if tiles can overlap
-            'OVERLAP_TILES': False,
-        # render image as its being built
-            'RENDER': False,                # 一个布尔标志,指示是否在构建过程中渲染图像
-        # multiprocessing pool size
-            'POOL_SIZE': 8,
-            'tiles_paths': [os.path.join(root, 'tiles', 'squares', 'gen_squares')]      # tiler 路径
+        'pixel_size': 6,           # 像素块大小
+        'pix_cal_type': 'median'    # 像素块值计算模式
     }
-    frames_to_pixelate(frames_path=output_folder, new_frames_save_path=new_frames_save_path, kwargs=kwargs, type=type, max_workers=10)
+    # params for tiler pixelate
+    # kwargs = {
+    #     # number of divisions per channel, (COLOR_DEPTH = 32 -> 32 * 32 * 32 = 32768 colors)
+    #         'COLOR_DEPTH': 255,    
+    #     # Scale of the image to be tiled (1 = default resolution)      
+    #         'IMAGE_SCALE': 1,               # 只会改变图像尺寸 w 和 h，但不会改变 tile 相对于图片的大小
+    #     # tiles scales (1 = default resolution), e.g. RESIZING_SCALES = [0.5, 0.4, 0.3, 0.2, 0.1]。根据原始 tiler 的大小进行放缩，原始 tiler 为 100x100 时，设为 0.1 表示 10x10
+    #         'RESIZING_SCALES': [0.1],       # 当只有一个元素时，表示只保留一种大小的像素，并且可以依此调整像素块的大小【一般设 0.2 效果还行，如果图片本身尺寸较小，可以设为 0.02-0.05 看看效果】
+    #     # number of pixels shifted to create each box (tuple with (x,y))
+    #     # if value is None, shift will be done accordingly to tiles dimensions
+    #         'PIXEL_SHIFT': None,
+    #     # if tiles can overlap
+    #         'OVERLAP_TILES': False,
+    #     # render image as its being built
+    #         'RENDER': False,                # 一个布尔标志,指示是否在构建过程中渲染图像
+    #     # multiprocessing pool size
+    #         'POOL_SIZE': 8,
+    #         'tiles_paths': [os.path.join(root, 'tiles', 'squares', 'gen_squares')]      # tiler 路径
+    # }
+    # frames_to_pixelate(frames_path=output_folder, new_frames_save_path=new_frames_save_path, kwargs=kwargs, type=type, max_workers=10)
 
     # 组帧
     fps = 30
     video_path = os.path.join(os.path.dirname(video_path), os.path.basename(video_path).replace('.', f'2pixelate_{type}.'))
-    # frames_to_video(frames_path=new_frames_save_path, video_path=video_path, fps=fps)
+    frames_to_video(frames_path=new_frames_save_path, video_path=video_path, fps=fps)
