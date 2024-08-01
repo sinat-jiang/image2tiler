@@ -12,7 +12,7 @@ def ret_color(x, color_gaps=32):
     """
     分割各颜色通道，将像素
 
-    Params：
+    Params:
     - color_gaps: 每个颜色通道的分割数 
     """
     color_range_list = [(256 // color_gaps) * i for i in range(color_gaps + 1)]      # e.g. [0, 64, 128, 192, 256]

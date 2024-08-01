@@ -136,7 +136,6 @@ if __name__ == '__main__':
     
     # 1 拆帧
     video_path = f'./test_videos/luori1.mp4'         # 视频文件路径
-    video_path = f'./test_videos/dance4.mp4'         # 视频文件路径
     output_folder = os.path.join(os.path.dirname(video_path), f"{os.path.basename(video_path).split('.')[0]}_frames")   # 输出文件夹路径
     # fps = video_frames_extract(video_path, output_folder, ff=None)
 
