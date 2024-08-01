@@ -125,7 +125,7 @@ def frames_to_pixelate(frames_path, new_frames_save_path, kwargs, type='simple',
 if __name__ == '__main__':
     
     # 1 拆帧
-    video_path = f'./test_videos/dance5.mp4'         # 视频文件路径
+    video_path = f'./test_videos/dance4.mp4'         # 视频文件路径
     output_folder = os.path.join(os.path.dirname(video_path), f"{os.path.basename(video_path).split('.')[0]}_frames")   # 输出文件夹路径
     # fps = video_frames_extract(video_path, output_folder, ff=None)
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     new_frames_save_path = os.path.join(os.path.dirname(output_folder), f"{os.path.basename(video_path).split('.')[0]}_{type}_pixelate_frames")
     # params for simple pixelate
     kwargs = {
-        'pixel_size': 6,           # 像素块大小
+        'pixel_size': 4,           # 像素块大小
         'pix_cal_type': 'median'    # 像素块值计算模式
     }
     # params for tiler pixelate
