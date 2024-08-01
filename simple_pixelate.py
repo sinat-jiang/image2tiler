@@ -8,12 +8,14 @@ import numpy as np
 import cv2
 
 
-# r, g, b 通道像素区间
-color_gaps = 32      # 4 * 4 * 4
-color_range_list = [(256 // color_gaps) * i for i in range(color_gaps + 1)]      # e.g. [0, 64, 128, 192, 256]
+def ret_color(x, color_gaps=32):
+    """
+    分割各颜色通道，将像素
 
-
-def ret_color(x):
+    Params：
+    - color_gaps: 每个颜色通道的分割数 
+    """
+    color_range_list = [(256 // color_gaps) * i for i in range(color_gaps + 1)]      # e.g. [0, 64, 128, 192, 256]
     for idx, v in enumerate(color_range_list):
         if x < v:
             return color_range_list[idx - 1]
@@ -91,7 +93,7 @@ def pixelate_image(img, pixel_size, pix_cal_type='mean'):
     return pixelated_image
 
 
-def pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type='median'):
+def pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type='median', color_gaps=32):
     """
     优化代码，加速执行效率
     """
@@ -138,7 +140,7 @@ def pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type
                 pixelated_data[y_start:y_end, x_start:x_end] = np.random(block, axis=[0, 1])
             elif pix_cal_type == 'range':
                 vectorized_function = np.vectorize(ret_color)
-                processed_array = vectorized_function(block)
+                processed_array = vectorized_function(block, color_gaps)
                 pixelated_data[y_start:y_end, x_start:x_end] = np.median(processed_array, axis=[0, 1])
             else:
                 raise ValueError(f"Unsupported image pixelate caculate mode: {mode}")
@@ -146,7 +148,6 @@ def pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type
     # 创建新的图像对象并保存
     pixelated_image = Image.fromarray(pixelated_data)
     pixelated_image.save(out_image_path)
-    print('success')
     return pixelated_data, pixelated_image
 
 
@@ -173,13 +174,13 @@ def enhance_edges(pixelated_image, canny_edges, edge_weight=0.5):
 
 if __name__ == '__main__':
     # 像素块的大小（正方形边长）
-    pixel_size = 6             # 5, 7, 10, 13, 16, 20
-    image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'simple_images', 'wukong.jpg')
-    # image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'standard_images', 'jz9.jpg')
+    pixel_size = 4             # 5, 7, 10, 13, 16, 20
+    # image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'simple_images', 'wukong.jpg')
+    image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'standard_images', 'luori1_frame_0.jpg')
     # image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'phone_background', 'rw7.jpg')
     out_image_path = os.path.join(os.path.dirname(image_path), os.path.basename(image_path).replace('.', f'_pix_{pixel_size}_out.'))
     # median 和 range+color_gaps[=5] 的效果较好，但这种方式的色彩不如 tiler 项目的色彩鲜艳
-    pixelated_data, pixelated_image = pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type='range')
+    pixelated_data, pixelated_image = pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type='range', color_gaps=16)
 
     # # 应用 Canny 边缘检测算法
     # canny_edges = apply_canny_edge_detection(pixelated_data)

@@ -6,7 +6,7 @@ import cv2
 from PIL import Image
 import numpy as np
 from tqdm import tqdm
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from simple_pixelate import pixelate_image_parallel
 from tiler import tiler_pixlate, load_tiles
 
@@ -107,17 +107,27 @@ def frames_to_pixelate(frames_path, new_frames_save_path, kwargs, type='simple',
         if type == 'tiler':
             # 提前加载好 tiler
             tiles = load_tiles(kwargs['tiles_paths'], kwargs)
-            
-        for frame in tqdm(frames, desc='Image2pixelate:'):
+
+        pool = ProcessPoolExecutor(max_workers=max_workers)
+
+        # sumbit all tasks
+        all_task = []
+        for frame in frames:
             frame = os.path.join(frames_path, frame)
             # 依次进行转换并存储
             output_image = os.path.join(new_frames_save_path, os.path.basename(frame))
             if type == 'simple':
-                task = pool.submit(pixelate_image_parallel, frame, output_image, **kwargs)
+                all_task.append(pool.submit(pixelate_image_parallel, frame, output_image, **kwargs))
             elif type == 'tiler':
-                task = pool.submit(tiler_pixlate, frame, kwargs['tiles_paths'], output_image, kwargs, tiles)
+                all_task.append(pool.submit(tiler_pixlate, frame, kwargs['tiles_paths'], output_image, kwargs, tiles))
             else:
                 print('请指定正确的转换类型')
+
+        # catch the results of all tasks and manual update the tqdm process bar
+        with tqdm(desc=f'Image2pixelate: ', ncols=80, total=len(frames)) as pbar_b:
+            for future in as_completed(all_task):
+                future.result()
+                pbar_b.update(1)
     
     print('All frames are converted to pixelate style.')
 
@@ -125,6 +135,7 @@ def frames_to_pixelate(frames_path, new_frames_save_path, kwargs, type='simple',
 if __name__ == '__main__':
     
     # 1 拆帧
+    video_path = f'./test_videos/luori1.mp4'         # 视频文件路径
     video_path = f'./test_videos/dance4.mp4'         # 视频文件路径
     output_folder = os.path.join(os.path.dirname(video_path), f"{os.path.basename(video_path).split('.')[0]}_frames")   # 输出文件夹路径
     # fps = video_frames_extract(video_path, output_folder, ff=None)
@@ -134,17 +145,18 @@ if __name__ == '__main__':
     new_frames_save_path = os.path.join(os.path.dirname(output_folder), f"{os.path.basename(video_path).split('.')[0]}_{type}_pixelate_frames")
     # params for simple pixelate
     kwargs = {
-        'pixel_size': 4,           # 像素块大小
-        'pix_cal_type': 'median'    # 像素块值计算模式
+        'pixel_size': 4,                # 像素块大小
+        'pix_cal_type': 'range',       # 像素块值计算模式
+        'color_gaps': 16
     }
     # params for tiler pixelate
     # kwargs = {
     #     # number of divisions per channel, (COLOR_DEPTH = 32 -> 32 * 32 * 32 = 32768 colors)
-    #         'COLOR_DEPTH': 255,    
+    #         'COLOR_DEPTH': 32,    
     #     # Scale of the image to be tiled (1 = default resolution)      
     #         'IMAGE_SCALE': 1,               # 只会改变图像尺寸 w 和 h，但不会改变 tile 相对于图片的大小
     #     # tiles scales (1 = default resolution), e.g. RESIZING_SCALES = [0.5, 0.4, 0.3, 0.2, 0.1]。根据原始 tiler 的大小进行放缩，原始 tiler 为 100x100 时，设为 0.1 表示 10x10
-    #         'RESIZING_SCALES': [0.1],       # 当只有一个元素时，表示只保留一种大小的像素，并且可以依此调整像素块的大小【一般设 0.2 效果还行，如果图片本身尺寸较小，可以设为 0.02-0.05 看看效果】
+    #         'RESIZING_SCALES': [0.03],       # 当只有一个元素时，表示只保留一种大小的像素，并且可以依此调整像素块的大小【一般设 0.2 效果还行，如果图片本身尺寸较小，可以设为 0.02-0.05 看看效果】
     #     # number of pixels shifted to create each box (tuple with (x,y))
     #     # if value is None, shift will be done accordingly to tiles dimensions
     #         'PIXEL_SHIFT': None,
@@ -156,7 +168,7 @@ if __name__ == '__main__':
     #         'POOL_SIZE': 8,
     #         'tiles_paths': [os.path.join(root, 'tiles', 'squares', 'gen_squares')]      # tiler 路径
     # }
-    # frames_to_pixelate(frames_path=output_folder, new_frames_save_path=new_frames_save_path, kwargs=kwargs, type=type, max_workers=10)
+    # frames_to_pixelate(frames_path=output_folder, new_frames_save_path=new_frames_save_path, kwargs=kwargs, type=type, max_workers=10 if type == 'simple' else 5)
 
     # 组帧
     fps = 30
