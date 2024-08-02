@@ -221,11 +221,12 @@ if __name__ == "__main__":
     # tiler params
     params = {
         # number of divisions per channel, (COLOR_DEPTH = 32 -> 32 * 32 * 32 = 32768 colors)
-            'COLOR_DEPTH': 255,    
+            'COLOR_DEPTH': 32,    
         # Scale of the image to be tiled (1 = default resolution)      
             'IMAGE_SCALE': 1,               # 只会改变图像尺寸 w 和 h，但不会改变 tile 相对于图片的大小
         # tiles scales (1 = default resolution), e.g. RESIZING_SCALES = [0.5, 0.4, 0.3, 0.2, 0.1]。根据原始 tiler 的大小进行放缩，原始 tiler 为 100x100 时，设为 0.1 表示 10x10
-            'RESIZING_SCALES': [0.06],       # 当只有一个元素时，表示只保留一种大小的像素，并且可以依此调整像素块的大小【一般设 0.2 效果还行，如果图片本身尺寸较小，可以设为 0.02-0.05 看看效果】
+            # 'RESIZING_SCALES': [0.15],       # 当只有一个元素时，表示只保留一种大小的像素，并且可以依此调整像素块的大小【一般设 0.2 效果还行，如果图片本身尺寸较小，可以设为 0.02-0.05 看看效果】
+            'RESIZING_SCALES': [0.5, 0.4, 0.3, 0.2, 0.1],
         # number of pixels shifted to create each box (tuple with (x,y))
         # if value is None, shift will be done accordingly to tiles dimensions
             'PIXEL_SHIFT': None,
@@ -238,12 +239,21 @@ if __name__ == "__main__":
     }
 
     root = os.path.dirname(__file__)
-    image_path = os.path.join(root, 'test_images', 'simple_images', 'wukong.jpg')
+    # image_path = os.path.join(root, 'test_images', 'simple_images', 'wukong.jpg')
     # image_path = os.path.join(root, 'test_images', 'simple_images', 'wukong.jpg')
     # image_path = os.path.join(root, 'test_images', 'simple_images', '10.jpg')
+    image_path = os.path.join(root, 'test_images', 'hd_images', 'pixel_character.png')
     # tiles_paths = os.path.join(root, 'tiles', 'circles', 'gen_circle_100')
     # tiles_paths = os.path.join(root, 'tiles', 'times', 'gen_times')
-    tiles_paths = os.path.join(root, 'tiles', 'squares', 'gen_squares')
+    # tiles_paths = os.path.join(root, 'tiles', 'squares', 'gen_square')
+    # tiles_paths = os.path.join(root, 'tiles', 'lego', 'gen_lego_h')
+    # tiles_paths = os.path.join(root, 'tiles', 'lines', 'gen_line_h')
+    # tiles_paths = os.path.join(root, 'tiles', 'waves', 'gen_wave')
+    # tiles_paths = os.path.join(root, 'tiles', 'at', 'gen_at')
+    # tiles_paths = os.path.join(root, 'tiles', 'hearts', 'gen_heart')
+    # tiles_paths = os.path.join(root, 'tiles', 'plus', 'gen_plus')
+    tiles_paths = os.path.join(root, 'tiles', 'clips', 'gen_clip')
+    # tiles_paths = os.path.join(root, 'tiles', 'minecraft')
     out_image_path = os.path.join(
         os.path.dirname(image_path), 
         f"{os.path.basename(image_path).split('.')[0]}_out.{os.path.basename(image_path).split('.')[1]}"

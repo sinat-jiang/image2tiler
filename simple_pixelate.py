@@ -173,14 +173,16 @@ def enhance_edges(pixelated_image, canny_edges, edge_weight=0.5):
 
 
 if __name__ == '__main__':
-    # 像素块的大小（正方形边长）
-    pixel_size = 4             # 5, 7, 10, 13, 16, 20
+    # 像素块的大小
+    # （正方形边长）
+    pixel_size = 15             # 5, 7, 10, 13, 16, 20
     # image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'simple_images', 'wukong.jpg')
-    image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'standard_images', 'luori1_frame_0.jpg')
+    # image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'standard_images', 'luori1_frame_0.jpg')
     # image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'phone_background', 'rw7.jpg')
+    image_path = os.path.join(os.path.dirname(__file__), 'test_images', 'hd_images', '1.jpg')
     out_image_path = os.path.join(os.path.dirname(image_path), os.path.basename(image_path).replace('.', f'_pix_{pixel_size}_out.'))
     # median 和 range+color_gaps[=5] 的效果较好，但这种方式的色彩不如 tiler 项目的色彩鲜艳
-    pixelated_data, pixelated_image = pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type='range', color_gaps=16)
+    pixelated_data, pixelated_image = pixelate_image_parallel(image_path, out_image_path, pixel_size, pix_cal_type='range', color_gaps=14)
 
     # # 应用 Canny 边缘检测算法
     # canny_edges = apply_canny_edge_detection(pixelated_data)
