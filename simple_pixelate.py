@@ -18,7 +18,7 @@ def ret_color(x, color_gaps=32):
     color_range_list = [(256 // color_gaps) * i for i in range(color_gaps + 1)]      # e.g. [0, 64, 128, 192, 256]
     for idx, v in enumerate(color_range_list):
         if x < v:
-            return color_range_list[idx - 1]
+            return (color_range_list[idx - 1] + color_range_list[idx]) // 2
     return color_range_list[-1]
 
 

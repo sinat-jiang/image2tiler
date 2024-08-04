@@ -137,12 +137,13 @@ def most_similar_tile(box_mode_freq, tiles):
 
 # builds the boxes and finds the best tile for each one
 def get_processed_image_boxes(image_path, tiles, args):
-    print('Getting and processing boxes')
+    # print('Getting and processing boxes')
     img = read_image(image_path, args, mainImage=True)
     pool = Pool(args['POOL_SIZE'])
     all_boxes = []
 
-    for res, ts in tqdm(sorted(tiles.items(), reverse=True)):
+    # for res, ts in tqdm(sorted(tiles.items(), reverse=True)):
+    for res, ts in sorted(tiles.items(), reverse=True):
         boxes = image_boxes(img, res, args)
         modes = pool.map(mode_color, [x['img'] for x in boxes])
         most_similar_tiles = pool.starmap(most_similar_tile, zip(modes, [ts for x in range(len(modes))]))
@@ -171,10 +172,11 @@ def place_tile(img, box, args):
 
 # tiles the image
 def create_tiled_image(boxes, res, args, render=False):
-    print('Creating tiled image')
+    # print('Creating tiled image')
     img = np.zeros(shape=(res[0], res[1], 4), dtype=np.uint8)
 
-    for box in tqdm(sorted(boxes, key=lambda x: x['min_dist'], reverse=args['OVERLAP_TILES'])):
+    # for box in tqdm(sorted(boxes, key=lambda x: x['min_dist'], reverse=args['OVERLAP_TILES'])):
+    for box in sorted(boxes, key=lambda x: x['min_dist'], reverse=args['OVERLAP_TILES']):
         place_tile(img, box, args)
         if render:
             show_image(img, wait=False)
@@ -243,20 +245,21 @@ if __name__ == "__main__":
     # image_path = os.path.join(root, 'test_images', 'simple_images', 'wukong.jpg')
     # image_path = os.path.join(root, 'test_images', 'simple_images', '10.jpg')
     image_path = os.path.join(root, 'test_images', 'hd_images', 'pixel_character.png')
-    # tiles_paths = os.path.join(root, 'tiles', 'circles', 'gen_circle_100')
-    # tiles_paths = os.path.join(root, 'tiles', 'times', 'gen_times')
-    # tiles_paths = os.path.join(root, 'tiles', 'squares', 'gen_square')
-    # tiles_paths = os.path.join(root, 'tiles', 'lego', 'gen_lego_h')
-    # tiles_paths = os.path.join(root, 'tiles', 'lines', 'gen_line_h')
-    # tiles_paths = os.path.join(root, 'tiles', 'waves', 'gen_wave')
-    # tiles_paths = os.path.join(root, 'tiles', 'at', 'gen_at')
-    # tiles_paths = os.path.join(root, 'tiles', 'hearts', 'gen_heart')
-    # tiles_paths = os.path.join(root, 'tiles', 'plus', 'gen_plus')
-    tiles_paths = os.path.join(root, 'tiles', 'clips', 'gen_clip')
-    # tiles_paths = os.path.join(root, 'tiles', 'minecraft')
+    # tiles_paths = [os.path.join(root, 'tiles', 'circles', 'gen_circle_100')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'times', 'gen_times')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'squares', 'gen_square')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'lego', 'gen_lego_h')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'lines', 'gen_line_h')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'waves', 'gen_wave')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'at', 'gen_at')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'hearts', 'gen_heart')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'plus', 'gen_plus')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'clips', 'gen_clip')]
+    tiles_paths = [os.path.join(root, 'tiles', 'plus', 'gen_plus'), os.path.join(root, 'tiles', 'times', 'gen_times')]
+    # tiles_paths = [os.path.join(root, 'tiles', 'minecraft')]
     out_image_path = os.path.join(
         os.path.dirname(image_path), 
         f"{os.path.basename(image_path).split('.')[0]}_out.{os.path.basename(image_path).split('.')[1]}"
     )
 
-    tiler_pixlate(image_path, [tiles_paths], out_image_path, params)
+    tiler_pixlate(image_path, tiles_paths, out_image_path, params)
