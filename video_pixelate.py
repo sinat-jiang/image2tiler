@@ -144,9 +144,9 @@ if __name__ == '__main__':
     new_frames_save_path = os.path.join(os.path.dirname(output_folder), f"{os.path.basename(video_path).split('.')[0]}_{type}_pixelate_frames")
     # params for simple pixelate
     kwargs = {
-        'pixel_size': 4,                # 像素块大小
-        'pix_cal_type': 'range',       # 像素块值计算模式
-        'color_gaps': 16
+        'pixel_size': 3,                # 像素块大小
+        'pix_cal_type': 'range',       # 像素块值计算模式：median、range
+        'color_gaps': 5
     }
     # params for tiler pixelate
     # kwargs = {
@@ -167,9 +167,9 @@ if __name__ == '__main__':
     #         'POOL_SIZE': 8,
     #         'tiles_paths': [os.path.join(root, 'tiles', 'squares', 'gen_squares')]      # tiler 路径
     # }
-    # frames_to_pixelate(frames_path=output_folder, new_frames_save_path=new_frames_save_path, kwargs=kwargs, type=type, max_workers=10 if type == 'simple' else 5)
+    # frames_to_pixelate(frames_path=output_folder, new_frames_save_path=new_frames_save_path, kwargs=kwargs, type=type, max_workers=8 if type == 'simple' else 5)
 
     # 组帧
-    fps = 30
+    fps = 25
     video_path = os.path.join(os.path.dirname(video_path), os.path.basename(video_path).replace('.', f'2pixelate_{type}.'))
     frames_to_video(frames_path=new_frames_save_path, video_path=video_path, fps=fps)
