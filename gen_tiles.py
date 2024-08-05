@@ -11,12 +11,15 @@ DEPTH = conf.DEPTH
 # list of rotations, in degrees, to apply over the original image
 ROTATIONS = conf.ROTATIONS
 
+DEPTH = 16
+ROTATIONS = [0]
+
 # 原始图片路径
 # img_path = sys.argv[1]
 img_path = os.path.join(os.path.dirname(__file__), 'tiles', 'squares', 'square.png')
 img_dir = os.path.dirname(img_path)
 img_name, ext = os.path.basename(img_path).rsplit('.', 1)
-out_folder = img_dir + f'/gen_{img_name}s'
+out_folder = img_dir + f'/gen_{img_name}_d16'
 
 if not os.path.exists(out_folder):
     os.mkdir(out_folder)

@@ -5,3 +5,4 @@ __pycache__/
 test_images/
 test_videos/
 tmp/
+tiles/squares/gen_square_*/
